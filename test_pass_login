@@ -1,0 +1,36 @@
+import boto3
+from datetime import datetime, timedelta
+
+def check_pass_login(client_user):
+    # 現在の日付を取得
+    now = datetime.now()
+    
+    # 120日前の日付を計算
+    threshold_date = now - timedelta(days=120)
+    
+    # IAMユーザーのリストを取得
+    users = client_user.list_users()['Users']
+    
+    neglected_users = []
+
+    for user in users:
+        user_name = user['UserName']
+        user_creation_date = user['CreateDate']
+        
+        # 最後のアクティビティを取得
+        last_activity = client_user.get_user(UserName=user_name)['User']['PasswordLastUsed']
+        
+        # 最後のアクティビティが120日以上前かつ、パスワード作成から120日以上経過しているかをチェック
+        if (last_activity is None or last_activity < threshold_date) and user_creation_date < threshold_date:
+            neglected_users.append(user_name)
+
+    return neglected_users
+
+def lambda_handler(event, context):
+    client_user = boto3.client('iam')
+    users_neglected_pass = check_pass_login(client_user)
+    
+    return {
+        'statusCode': 200,
+        'body': users_neglected_pass
+    }

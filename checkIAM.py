@@ -16,7 +16,6 @@ Description:
     - Boto3 : AWS SDK for Python
     - Lambda : Serverless compute service by AWS
 """
-# git の実験
 import boto3 
 
 # user情報の取得, MFA設定の確認
