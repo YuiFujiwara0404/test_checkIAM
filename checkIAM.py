@@ -119,6 +119,8 @@ def lambda_handler(event, context):
     client_user = boto3.client('iam')
     users_without_mfa = check_mfa_certification(client_user)
 
+    # 最終アクティビティとパスワードの有効期限を確認
+    
     # MFAデバイスが無いユーザーにメールを送信
     client_mail = boto3.client('ses')
     mail_results = send_mail(users_without_mfa, client_mail)
